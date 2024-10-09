@@ -1,0 +1,24 @@
+﻿  main.cpp
+E:\UCSP_EDA\EDA_TAREAS\R_tree\main\main.cpp(69,20): warning C4244: '=': conversion from 'float' to '_Ty1', possible loss of data
+          with
+          [
+              _Ty1=int
+          ]
+E:\UCSP_EDA\EDA_TAREAS\R_tree\main\main.cpp(70,25): warning C4244: '=': conversion from 'float' to '_Ty2', possible loss of data
+          with
+          [
+              _Ty2=int
+          ]
+E:\UCSP_EDA\EDA_TAREAS\R_tree\main\main.cpp(85,21): warning C4244: '=': conversion from 'float' to '_Ty1', possible loss of data
+          with
+          [
+              _Ty1=int
+          ]
+E:\UCSP_EDA\EDA_TAREAS\R_tree\main\main.cpp(86,26): warning C4244: '=': conversion from 'float' to '_Ty2', possible loss of data
+          with
+          [
+              _Ty2=int
+          ]
+  RTree.cpp
+  Generating Code...
+  main.vcxproj -> E:\UCSP_EDA\EDA_TAREAS\R_tree\x64\Debug\main.exe
