@@ -655,7 +655,7 @@ bool RTree::Overlap(Rect* a_rectA, Rect* a_rectB) const
 
 bool RTree::Overlap2(Rect* a_rectA, Rect* a_rectB) const
 {
-
+	//b inside a
 	if (a_rectA->m_min[0] <= a_rectB->m_min[0] &&
 		a_rectB->m_max[0] <= a_rectA->m_max[0] &&
 		a_rectA->m_min[1] <= a_rectB->m_min[1] &&
@@ -755,7 +755,7 @@ Rect RTree::MBR(vector<pair<int, int>> pol)
 	return Rect(x1, y1, x2, y2);
 }
 
-void RTree::SearchRectanglesAtRectangles(const int a_min[2], const int a_max[2], vector<vector<pair<int, int>>>& result)
+void RTree::SearchRectanglesAtRectangle(const int a_min[2], const int a_max[2], vector<pair<vector<pair<int, int>>, Rect>>& result, vector<Rect>& outsideRects)
 {
 	Rect rect;
 	for (int axis = 0; axis < 2; ++axis)
@@ -763,12 +763,14 @@ void RTree::SearchRectanglesAtRectangles(const int a_min[2], const int a_max[2],
 		rect.m_min[axis] = a_min[axis];
 		rect.m_max[axis] = a_max[axis];
 	}
-	result.clear();
-	SearchRectanglesAtRectanglesRec(m_root, &rect, result);
+	result.clear(); outsideRects.clear();
+	outsideRects.push_back(rect);
+	SearchRectanglesAtRectangleRec(m_root, &rect, result, outsideRects);
 }
 
 
-void RTree::SearchRectanglesAtRectanglesRec(Node* a_node, Rect* a_rect, vector<vector<pair<int, int>>>& result)
+
+void RTree::SearchRectanglesAtRectangleRec(Node* a_node, Rect* a_rect, vector<pair<vector<pair<int, int>>, Rect>>& result, vector<Rect>& outsideRects)
 {
 	if (a_node->IsInternalNode())
 	{
@@ -778,23 +780,47 @@ void RTree::SearchRectanglesAtRectanglesRec(Node* a_node, Rect* a_rect, vector<v
 			// Si el MBR se solapa continuar la busqueda en el hijo
 			if (Overlap(a_rect, &branch->m_rect))
 			{
-				SearchRectanglesAtRectanglesRec(branch->m_child, a_rect, result);
+				if (Overlap2(&branch->m_rect, a_rect))
+				{
+					outsideRects.push_back(branch->m_rect);
+				}
+				SearchRectanglesAtRectangleRec(branch->m_child, a_rect, result, outsideRects);
 			}
 		}
 	}
 	else 
 	{
-		// Agregar los datos que colicionan con el rectangulo de busqueda
+		// Agregar los datos que colisionan con el rectangulo de busqueda
 		for (int index = 0; index < a_node->m_count; ++index)
 		{
 			Branch* branch = &a_node->m_branch[index];
 			if (Overlap(a_rect, &branch->m_rect))
 			{
-				result.push_back(branch->m_data);
+				result.push_back({ branch->m_data, branch->m_rect });
 			}
 		}
 	}
 }
+
+void RTree::printSearchRectanglesAtRectangle(const int a_min[2], const int a_max[2], vector<pair<vector<pair<int, int>>, Rect>>& result)
+{
+	cout << " Search in area : min = (" << a_min[0] << ", " << a_min[1] << 
+						"), max = (" << a_max[0] << ", " << a_max[1] << ")" << endl;
+
+	cout << " number of polygons :" << result.size() << endl;
+	cout << endl << "--------------------" << endl;
+	for (auto& objects : result) {
+		cout << " number of points :" << objects.first.size() << endl;
+		cout << " Rect : min = (" << objects.second.m_min[0] << ", " << objects.second.m_min[1] <<"), max = (" << objects.second.m_max[0] << ", " << objects.second.m_max[1] << ")" << endl;
+		for (auto& point : objects.first) {
+			cout << "   point:" << point.first << " | " << point.second << endl;
+		}
+		
+		cout << endl << "--------------------" << endl;
+	}
+}
+
+
 
 void RTree::SearchPointsInRect(const int a_min[2], const int a_max[2], vector<pair<int, int>>& result)
 {
@@ -850,6 +876,7 @@ void RTree::SearchRectanglesAtPoint(const int point[2], vector<vector<pair<int, 
 }
 
 
+
 void RTree::SearchRectanglesAtPointRec(Node* a_node, const int point[2], vector<vector<pair<int, int>>>& result)
 {
 	if (a_node->IsInternalNode())
@@ -865,7 +892,7 @@ void RTree::SearchRectanglesAtPointRec(Node* a_node, const int point[2], vector<
 	}
 	else
 	{
-		// verificar si los rectángulos colicioann con el punto
+		// verificar si los rectángulos colisioann con el punto
 		for (int index = 0; index < a_node->m_count; ++index)
 		{
 			Branch* branch = &a_node->m_branch[index];
@@ -885,6 +912,48 @@ bool RTree::ContainsPoint(const Rect* rect, const int point[2]) const
 			point[1] <= rect->m_max[1]);
 }
 
+void RTree::SearchRectanglesInsideRectangle(const int a_min[2], const int a_max[2], vector<vector<pair<int, int>>>& result, vector<Rect>& rects)
+{
+	Rect rect;
+	for (int axis = 0; axis < 2; ++axis)
+	{
+		rect.m_min[axis] = a_min[axis];
+		rect.m_max[axis] = a_max[axis];
+	}
+	result.clear();
+	SearchRectanglesInsideRectangleRec(m_root, &rect, result, rects);
+}
+
+
+void RTree::SearchRectanglesInsideRectangleRec(Node* a_node, Rect* a_rect, vector<vector<pair<int, int>>>& result, vector<Rect>& rects)
+{
+	if (a_node->IsInternalNode())
+	{
+		for (int index = 0; index < a_node->m_count; ++index)
+		{
+			Branch* branch = &a_node->m_branch[index];
+			// Si el MBR se solapa continuar la busqueda en el hijo
+			if (Overlap(a_rect, &branch->m_rect))
+			{
+				SearchRectanglesInsideRectangleRec(branch->m_child, a_rect, result, rects);
+			}
+		}
+	}
+	else
+	{
+		// Agregar los datos que colisionan con el rectangulo de busqueda
+		for (int index = 0; index < a_node->m_count; ++index)
+		{
+			Branch* branch = &a_node->m_branch[index];
+			if (Overlap2(a_rect, &branch->m_rect))
+			{
+				result.push_back(branch->m_data);
+				rects.push_back(branch->m_rect);
+			}
+		}
+	}
+}
+
 
 void RTree::ExportToJson(const std::string& filename)
 {
@@ -899,13 +968,24 @@ void RTree::ExportToJson(const std::string& filename)
 	file.close();
 }
 
-Rect RTree::rootMBR()
+void RTree::ExportSearchRectanglesAtRectangleToJson(const std::string& filename, vector<Rect>& outsideRects)
 {
-	for (int i = 0; i < m_root->m_count; i++)
-	{
+	json j;
+	j["rects"] = json::array();
 
+	
+	for (auto& rect : outsideRects)
+	{
+		json jbranch;
+		jbranch["min"] = { rect.m_min[0], rect.m_min[1] };
+		jbranch["max"] = { rect.m_max[0], rect.m_max[1] };
+		j["rects"].push_back(jbranch);
 	}
-	return Rect();
+
+	// Guardar JSON
+	std::ofstream file(filename);
+	file << j.dump(4); // 4 de identacion
+	file.close();
 }
 
 void RTree::ExportNodeToJson(Node* node, json& jnode)

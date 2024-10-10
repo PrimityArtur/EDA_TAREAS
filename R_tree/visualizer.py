@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import random
 
 def draw_node(ax, node):
     for branch in node['branches']:
@@ -9,6 +10,7 @@ def draw_node(ax, node):
         max_x, max_y = rect['max']
         width = max_x - min_x
         height = max_y - min_y
+        random_color = (random.random(), random.random(), random.random())
 
         # Dibujar el rectngulo
         rect_patch = patches.Rectangle((min_x, min_y), width, height, linewidth=1, edgecolor='green', facecolor='none')
@@ -28,10 +30,22 @@ def draw_node(ax, node):
                 '''
                 x_points.append(data[0][0])
                 y_points.append(data[0][1])
+                ax.plot(x_points, y_points, c=random_color, linewidth=0.5)            
                 '''
-                ax.plot(x_points, y_points, c='blue', linewidth=0.5)            
             '''
             '''
+            
+def draw_outsideRects(ax, node):
+    for rect in node:
+        min_x, min_y = rect['min']
+        max_x, max_y = rect['max']
+        width = max_x - min_x
+        height = max_y - min_y
+        random_color = (random.random(), random.random(), random.random())
+
+        # Dibujar el rectngulo
+        rect_patch = patches.Rectangle((min_x, min_y), width, height, linewidth=1, edgecolor='blue', facecolor='none')
+        ax.add_patch(rect_patch)
 
 def main():
 
@@ -45,10 +59,18 @@ def main():
     max_x, max_y = rect['max']
     width = max_x - min_x
     height = max_y - min_y
-    rect_patch = patches.Rectangle((min_x, min_y), width, height, linewidth=0.5, edgecolor='red', facecolor='none')
+    rect_patch = patches.Rectangle((min_x, min_y), width, height, linewidth=2, edgecolor='red', facecolor='none')
     ax.add_patch(rect_patch)
     # dibujar los nodos
     draw_node(ax, data['root'])
+
+
+
+    with open('json_rtree_outsudeRects.json', 'r') as f:
+        dataRects = json.load(f)
+    # dibujar los nodos
+    draw_outsideRects(ax, dataRects['rects'])    
+
 
 
     # Cnfigurar labels

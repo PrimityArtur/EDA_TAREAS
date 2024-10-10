@@ -107,29 +107,37 @@ public:
 	Rect MBR(vector<pair<int, int>> pol);
 
 	//Init - SEARCH 
-	void SearchRectanglesAtRectangles(const int a_min[2], const int a_max[2], vector<vector<pair<int, int>>>& result);
+	void SearchRectanglesAtRectangle(const int a_min[2], const int a_max[2], vector<pair<vector<pair<int, int>>, Rect>>& result, vector<Rect>& outsideRects);
+	void printSearchRectanglesAtRectangle(const int a_min[2], const int a_max[2], vector<pair<vector<pair<int, int>>, Rect>>& result);
+
 	void SearchPointsInRect(const int a_min[2], const int a_max[2], vector<pair<int, int>>& result);
+	
 	void SearchRectanglesAtPoint(const int point[2], vector<vector<pair<int, int>>>& result);
+	
+	void SearchRectanglesInsideRectangle(const int a_min[2], const int a_max[2], vector<vector<pair<int, int>>>& result, vector<Rect>& rects);
 
 	//End - SEARCH
 
-	//Init - EXPORT
+	//Init - EXPORTJSON
 	void ExportToJson(const std::string& filename);
-	Rect rootMBR();
+	void ExportSearchRectanglesAtRectangleToJson(const std::string& filename, vector<Rect>& outsideRects);
 	//End - EXPORT
 protected:
 
 	//Init - SEARCH 
-	void SearchRectanglesAtRectanglesRec(Node* a_node, Rect* a_rect, vector<vector<pair<int, int>>>& result);
-	void SearchPointsInRectRec(Node* a_node, Rect* a_rect, vector<pair<int, int>>& result);
+	void SearchRectanglesAtRectangleRec(Node* a_node, Rect* a_rect, vector<pair<vector<pair<int, int>>, Rect>>& result, vector<Rect>& outsideRects);
 
+	void SearchPointsInRectRec(Node* a_node, Rect* a_rect, vector<pair<int, int>>& result);
+	
 	void SearchRectanglesAtPointRec(Node* a_node, const int point[2], vector<vector<pair<int, int>>>& result);
+	
+	void SearchRectanglesInsideRectangleRec(Node* a_node, Rect* a_rect, vector<vector<pair<int, int>>>& result, vector<Rect>& rects);
 	// verificar si un rectángulo coliciona con el punto
 	bool ContainsPoint(const Rect* rect, const int point[2]) const;
 
 	//End - SEARCH
 
-	//Init - EXPORT
+	//Init - EXPORTJSON
 	void ExportNodeToJson(Node* node, json& jnode);
 	//End - EXPORT
 

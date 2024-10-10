@@ -2,6 +2,8 @@
 #include <vector>
 #include <iostream>
 #include "RTree.h"
+#include <ctime>
+#include <cstdlib>
 
 using namespace std;
 
@@ -50,14 +52,81 @@ void print(const int& command, vector<vector<vector<pair<int, int>>>>& objects_n
 }
 
 void print_pair(vector<pair<int, int>> output) {
+	cout << "{";
 	for (auto& x : output)
 	{
-		cout << " ( " << x.first << " , " << x.second << " ) ";
+		cout << " { " << x.first << " , " << x.second << " } " << 
+			( &x == &output[output.size()-1] ? "" : ",");
 	}
+	cout << "},";
 }
-
+/*
 int main(int argc, char* argv[])
 {
+	//TAREA
+	srand(time(0));
+
+	//		-----======		POINTS		=====-----
+	int inputs = 30, SetPoints[2] = {2,3}, max = 100;
+	
+	
+	////RANDOM POINTS
+	//vector<vector<pair<int, int>>> vPoints;
+	//for (int i = 0; i < inputs; i++)
+	//{
+	//	int randomSetPoint = SetPoints[rand() % 2];
+	//	vector<pair<int, int>> points;
+	//	for (int p = 0; p < randomSetPoint; p++)
+	//	{
+	//		points.emplace_back(rand() % max, rand() % max);
+	//	}
+	//	vPoints.push_back(points);
+	//}
+	
+	
+	vector<vector<pair<int, int>>> vPoints = {
+	{ { 20 , 59 } , { 20 , 43 } },
+	{ { 50 , 58 } , { 48 , 67 } },
+	{ { 105 , 68 } , { 74 , 64 } },
+	{ { 83 , 40 } , { 104 , 54 } },
+	{ { 12 , 28 } , { 19 , 15 } , { 40 , 29 } },
+	{ { 69 , 25 } , { 70 , 28 } , { 60 , 15 } }
+	};
+	
+
+
+	RTree rtree;
+	string output;
+	vector<vector<pair<int, int>>> objects;
+	vector<vector<vector<pair<int, int>>>> objects_n;
+
+	for (auto& x : vPoints)
+	{
+		cout << "inserting " << x.size() << ": ";
+		print_pair(x);
+		Rect rect = rtree.MBR(x);
+		rtree.Insert(rect.m_min, rect.m_max, x);
+		cout << endl;
+	}
+	rtree.getMBRs(objects_n);
+	print(1, objects_n, output);
+	rtree.ExportToJson(string("json_rtree.json"));
+
+	// SEARCH
+	int a_min[2] = { 20,20 },
+		a_max[2] = { 40,40 };
+	vector<pair<vector<pair<int, int>>, Rect>> result;
+	vector<Rect> outsideRects;
+	rtree.SearchRectanglesAtRectangle(a_min, a_max, result, outsideRects);
+	rtree.printSearchRectanglesAtRectangle(a_min, a_max, result);
+	rtree.ExportSearchRectanglesAtRectangleToJson(string("json_rtree_outsudeRects.json"), outsideRects);
+
+	return 0;
+}*/
+
+
+
+int main() {
 	vector<vector<pair<int, int>>> vpoints;
 
 	//   First Test
@@ -138,20 +207,28 @@ int main(int argc, char* argv[])
 	rtree.getMBRs(objects_n);
 	print(1, objects_n, output);
 
-
-
 	cout << " REMOVING LAST INSERTED " << endl;
 	print_pair(ad);
 	rtree.Remove(rect.m_min, rect.m_max, ad);
 	cout << endl;
+	
 
 	//Rect rect = rtree.MBR(vpoints[0]);
 	 //rtree.Insert(rect.m_min, rect.m_max, vpoints[0]);
+
 	rtree.getMBRs(objects_n);
 	print(1, objects_n, output);
-
-	//TAREA
 	rtree.ExportToJson(string("json_rtree.json"));
+
+	// SEARCH
+	int a_min[2] = { 20,20 },
+		a_max[2] = { 40,50 };
+	vector<pair<vector<pair<int, int>>, Rect>> result;
+	vector<Rect> outsideRects;
+	rtree.SearchRectanglesAtRectangle(a_min, a_max, result, outsideRects);
+	rtree.printSearchRectanglesAtRectangle(a_min, a_max, result);
+	rtree.ExportSearchRectanglesAtRectangleToJson(string("json_rtree_outsudeRects.json"), outsideRects);
 
 	return 0;
 }
+
